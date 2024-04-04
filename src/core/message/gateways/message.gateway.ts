@@ -5,6 +5,7 @@ export type DropMessageResponse =  {
 export type DropAnonymousMessageRequest = {
     id: string
     content: string
+    at: string
 }
 export interface MessageGateway{
     dropAnonymous(message: DropAnonymousMessageRequest): Promise<DropMessageResponse>

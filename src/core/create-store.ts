@@ -4,10 +4,14 @@ import { IdGenerator } from "./message/gateways/id.generator";
 import { Params, Result, createDropAnonymousMessage } from "./message/usecases/drop-message.usecase";
 import { FakeIdGenerator } from "./message/gateways/fake-id.generator";
 import { FakeMessageGateway } from "./message/gateways/fake.message.gateway";
+import { AnonymousDropReceipt } from "./message/models/drop-receipt.model";
+import { DateProvider } from "./message/gateways/date.prodivder";
+import { FakeDateProvider } from "./message/gateways/fake-date.provider";
 
 export type Dependencies = {
     idGenerator: IdGenerator
     messageGateway: MessageGateway
+    dateProvider: DateProvider
 }
 export class Store{
     constructor(private _message: MessageStore){}
@@ -17,7 +21,8 @@ export class Store{
 }
 const initialDeps : Dependencies = {
     idGenerator: new FakeIdGenerator(),
-    messageGateway: new FakeMessageGateway()
+    messageGateway: new FakeMessageGateway(),
+    dateProvider: new FakeDateProvider()
 }
 
 export const createStore=(deps: Partial<Dependencies>)=>{
@@ -26,17 +31,17 @@ export const createStore=(deps: Partial<Dependencies>)=>{
 }
 
 export class MessageStore{
-    private _droppedTickets = signal<DropMessageResponse[]>([]);
+    private _droppedReceipts = signal<AnonymousDropReceipt[]>([]);
     constructor(private deps: Dependencies){}
     async drop(params: Params): Promise<Result>{
         const response = await createDropAnonymousMessage(this.deps)(params)
-        this.notifyDroppedTicket(response.ticket)
+        this.messageWasDroppedWith({id: response.receipt, validUntil: response.validUntil, droppedAt: response.at})
         return response
     }
-    get droppedTickets(){
-        return this._droppedTickets
+    get droppedReceipts(){
+        return this._droppedReceipts
     }
-    notifyDroppedTicket(ticket: DropMessageResponse){
-        this._droppedTickets.value.push(ticket)
+    messageWasDroppedWith(receipt: AnonymousDropReceipt){
+        this._droppedReceipts.value.push(receipt)
     }
 }

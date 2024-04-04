@@ -3,8 +3,8 @@ import { MessageGateway, DropAnonymousMessageRequest, DropMessageResponse } from
 export class FakeMessageGateway implements MessageGateway{
     private _willReturnDropResponse!: DropMessageResponse;
     private _wasDroppedWith!: DropAnonymousMessageRequest;
-    willReturnDropResponse(ticket: DropMessageResponse){
-        this._willReturnDropResponse = ticket
+    willReturnDropResponse(response: DropMessageResponse){
+        this._willReturnDropResponse = response
     }
     wasDroppedAnonymouslyWithRequest(){
         return this._wasDroppedWith
