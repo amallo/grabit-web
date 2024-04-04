@@ -3,7 +3,6 @@ export type DropMessageResponse =  {
     validUntil: string
 }
 export type DropAnonymousMessageRequest = {
-    id: string
     content: string
     at: string
 }
