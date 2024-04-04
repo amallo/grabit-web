@@ -1,17 +1,17 @@
-import { MessageGateway, DropAnonymousMessageRequest, MessageTicketResponse } from "./message.gateway";
+import { MessageGateway, DropAnonymousMessageRequest, DropMessageResponse } from "./message.gateway";
 
 export class FakeMessageGateway implements MessageGateway{
-    private _willReturnTicket!: MessageTicketResponse;
+    private _willReturnDropResponse!: DropMessageResponse;
     private _wasDroppedWith!: DropAnonymousMessageRequest;
-    willBeDroppedWithTicket(ticket: MessageTicketResponse){
-        this._willReturnTicket = ticket
+    willReturnDropResponse(ticket: DropMessageResponse){
+        this._willReturnDropResponse = ticket
     }
-    wasAnonymouslyDroppedWith(){
+    wasDroppedAnonymouslyWithRequest(){
         return this._wasDroppedWith
     }
-    dropAnonymous(message: DropAnonymousMessageRequest): Promise<MessageTicketResponse> {
+    dropAnonymous(message: DropAnonymousMessageRequest): Promise<DropMessageResponse> {
         this._wasDroppedWith = message
-        return Promise.resolve(this._willReturnTicket)
+        return Promise.resolve(this._willReturnDropResponse)
     }
     
 }

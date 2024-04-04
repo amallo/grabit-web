@@ -1,12 +1,11 @@
-export type MessageTicketResponse =  {
-    id: string
+export type DropMessageResponse =  {
+    receipt: string
     validUntil: string
-    messageId: string
 }
 export type DropAnonymousMessageRequest = {
     id: string
     content: string
 }
 export interface MessageGateway{
-    dropAnonymous(message: DropAnonymousMessageRequest): Promise<MessageTicketResponse>
+    dropAnonymous(message: DropAnonymousMessageRequest): Promise<DropMessageResponse>
 }

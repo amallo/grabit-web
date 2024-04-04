@@ -1,11 +1,11 @@
 import { Dependencies } from "../../create-store"
-import {  MessageTicketResponse } from "../gateways/message.gateway"
+import {  DropMessageResponse } from "../gateways/message.gateway"
 
 export type Params = {
     content: string
 }
 export type Result = {
-    ticket: MessageTicketResponse
+    ticket: DropMessageResponse
 }
 export const createDropAnonymousMessage = (deps: Dependencies)=>{
     return async (params: Params): Promise<Result>=>{

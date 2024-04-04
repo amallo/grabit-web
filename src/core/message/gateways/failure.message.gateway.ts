@@ -1,4 +1,4 @@
-import { MessageGateway, DropAnonymousMessageRequest, MessageTicketResponse } from "./message.gateway";
+import { MessageGateway, DropAnonymousMessageRequest, DropMessageResponse } from "./message.gateway";
 
 export class FailureMessageGateway implements MessageGateway{
     private _willRejectWith!: Error;
@@ -6,7 +6,7 @@ export class FailureMessageGateway implements MessageGateway{
     willRejectWith(error: Error){
         this._willRejectWith = error
     }
-    dropAnonymous(_: DropAnonymousMessageRequest): Promise<MessageTicketResponse> {
+    dropAnonymous(_: DropAnonymousMessageRequest): Promise<DropMessageResponse> {
         return Promise.reject(this._willRejectWith)
     }
     
