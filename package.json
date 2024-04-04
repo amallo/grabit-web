@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "jest": {
-    "testMatch": ["**/?(*.)+(spec|test).[jt]s?(x)" ]
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ]
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
@@ -19,6 +21,7 @@
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.23",
     "framer-motion": "^6.5.1",
+    "purify-ts": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",

@@ -1,15 +1,9 @@
 import { signal } from "@preact/signals-react";
-import { MessageGateway, DropMessageResponse } from "./message/gateways/message.gateway";
-import { IdGenerator } from "./message/gateways/id.generator";
-import { Params, Result, createDropAnonymousMessage } from "./message/usecases/drop-message.usecase";
-import { FakeIdGenerator } from "./message/gateways/fake-id.generator";
-import { FakeMessageGateway } from "./message/gateways/fake.message.gateway";
-import { AnonymousDropReceipt } from "./message/models/drop-receipt.model";
+import { MessageGateway } from "./message/gateways/message.gateway";
+import { DropReceipt } from "./message/models/drop-receipt.model";
 import { DateProvider } from "./message/gateways/date.prodivder";
-import { FakeDateProvider } from "./message/gateways/fake-date.provider";
 
 export type Dependencies = {
-    idGenerator: IdGenerator
     messageGateway: MessageGateway
     dateProvider: DateProvider
 }
@@ -19,29 +13,17 @@ export class Store{
         return this._message
     }
 }
-const initialDeps : Dependencies = {
-    idGenerator: new FakeIdGenerator(),
-    messageGateway: new FakeMessageGateway(),
-    dateProvider: new FakeDateProvider()
-}
-
-export const createStore=(deps: Partial<Dependencies>)=>{
-    const messageStore = new MessageStore({...initialDeps, ...deps})
+export const createStore=()=>{
+    const messageStore = new MessageStore()
     return  new Store(messageStore)
 }
 
 export class MessageStore{
-    private _droppedReceipts = signal<AnonymousDropReceipt[]>([]);
-    constructor(private deps: Dependencies){}
-    async drop(params: Params): Promise<Result>{
-        const response = await createDropAnonymousMessage(this.deps)(params)
-        this.messageWasDroppedWith({id: response.receipt, validUntil: response.validUntil, droppedAt: response.at})
-        return response
-    }
+    private _droppedReceipts = signal<DropReceipt[]>([]);
     get droppedReceipts(){
         return this._droppedReceipts
     }
-    messageWasDroppedWith(receipt: AnonymousDropReceipt){
+    messageWasDroppedWithReceipt(receipt: DropReceipt){
         this._droppedReceipts.value.push(receipt)
     }
 }

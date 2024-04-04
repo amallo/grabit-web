@@ -1,17 +1,13 @@
-import { Dependencies } from "../../create-store"
+import { Dependencies, Store } from "../../create-store"
 
 export type Params = {
     content: string
 }
-export type Result = {
-    receipt: string
-    validUntil: string
-    at: string
-}
-export const createDropAnonymousMessage = (deps: Dependencies)=>{
-    return async (params: Params): Promise<Result>=>{
+
+export const createDropAnonymousMessage = (store: Store, deps: Dependencies)=>{
+    return async (params: Params)=>{
         const now = deps.dateProvider.now()
         const response = await deps.messageGateway.dropAnonymous({content: params.content, at: now})
-        return  {receipt: response.receipt, at: now, validUntil: response.validUntil }
+        store.message.messageWasDroppedWithReceipt({id: response.receipt, droppedAt: now, validUntil: response.validUntil })
     }
 }
