@@ -1,4 +1,4 @@
-export interface AnonymousDropReceipt{
+export interface DropMessageReceipt{
     id: string
     validUntil: string
     droppedAt: string
