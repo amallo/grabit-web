@@ -1,5 +1,5 @@
-import { Dependencies } from "../../create-store"
-import { makeErr } from "../../error/models/err.model"
+import { Dependencies } from "../../create-core.store"
+import { makeErr } from "../../common/models/err.model"
 
 export type Params = {
     content: string

@@ -1,7 +1,7 @@
-import { Dependencies, Store, createTestStore } from "../../create-store"
-import { Err } from "../../error/models/err.model"
+import { Dependencies, CoreStore, createTestCoreStore } from "../../create-core.store"
+import { Err } from "../../common/models/err.model"
 import { FailureMessageGateway } from "../gateways/failure.message.gateway"
-import { FakeDateProvider } from "../gateways/fake-date.provider"
+import { FakeDateProvider } from "../../common/gateways/fake-date.provider"
 import { FakeMessageGateway } from "../gateways/fake.message.gateway"
 import {  DropMessageResponse } from "../gateways/message.gateway"
 import { DropMessageReceipt } from "../models/drop-message-receipt.model"
@@ -12,7 +12,7 @@ export const createMessageFixture = ()=>{
     const dependencies: Partial<Dependencies> = {
         messageGateway, dateProvider
     }
-    let store : Store
+    let store : CoreStore
 
     return {
         givenNowIs(now: Date){
@@ -27,14 +27,14 @@ export const createMessageFixture = ()=>{
                 failureMessageGateway.willRejectWith(error)
                 dependencies.messageGateway = failureMessageGateway
             }
-            store = createTestStore(dependencies)
+            store = createTestCoreStore(dependencies)
             return store.message.drop(params)
         },
         thenDropMessageReceiptShouldEqual(expected: DropMessageReceipt){
             expect(store.message.droppedReceipts.value).toEqual([expected])
         },
         thenDroppingAnonymousMessageShouldFailWith(err: Err){
-            expect(store.message.dropErrors.value).toContainEqual(err)
+            expect(store.message.errors.value).toContainEqual(err)
         }
     }
     
