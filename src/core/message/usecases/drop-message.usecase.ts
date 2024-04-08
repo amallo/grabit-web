@@ -8,17 +8,17 @@ export type Result = {
     receipt: string
     validUntil: string
     at: string
+    message: string
 }
 export const createDropAnonymousMessage = (deps: Dependencies)=>{
     return async (params: Params): Promise<Result>=>{
         const now = deps.dateProvider.now()
         try{
-            console.log("deps.messageGateway", deps.messageGateway)
-            const response = await deps.messageGateway.dropAnonymous({content: params.content, at: now})
-            return  {receipt: response.receipt, at: now, validUntil: response.validUntil }
+            const willGenerateMessageId = deps.idGenerator.generate()
+            const response = await deps.messageGateway.dropAnonymous({content: params.content, at: now, messageId: willGenerateMessageId})
+            return  {receipt: response.receipt, at: now, validUntil: response.validUntil, message: willGenerateMessageId }
         }
         catch(e){
-            console.log("errror", e)
             throw makeErr("DROP_MESSAGE_ERROR", "GATEWAY_ERROR", e as Error)
         }
     }
