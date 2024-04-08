@@ -8,7 +8,6 @@ describe("FEATURE: drop a message", ()=>{
         messageFixture.givenWillDropMessageResponse({
             receipt: 'receipt0',
             validUntil: '2024-04-04T10:52:19+02:00',
-            message: "message0"
         })
         messageFixture.givenPreviousError({
             code: 'DROP_MESSAGE_ERROR',

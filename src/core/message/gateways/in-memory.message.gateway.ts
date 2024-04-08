@@ -7,12 +7,11 @@ export class InMemoryMessageGateway implements MessageGateway{
 
     }
     dropAnonymous(message: DropAnonymousMessageRequest): Promise<DropMessageResponse> {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve)=>{
             setTimeout(() => {
                 const generatedReceiptId = this.receiptIdGenerator.generate()
                 const generatedMessageId = this.receiptIdGenerator.generate()
                 const receipt : DropMessageResponse= {
-                    message: generatedMessageId,
                     receipt: generatedReceiptId,
                     validUntil: new Date(new Date(message.at).getTime() + this.validityPeriodInHours * 3600 * 1000).toISOString()
                 }
