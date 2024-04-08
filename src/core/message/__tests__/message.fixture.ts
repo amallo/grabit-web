@@ -1,4 +1,4 @@
-import { Dependencies, CoreStore, createTestCoreStore } from "../../create-core.store"
+import { Dependencies, CoreStore, createTestCoreStore, coreStore } from "../../create-core.store"
 import { Err } from "../../common/models/err.model"
 import { FailureMessageGateway } from "../gateways/failure.message.gateway"
 import { FakeDateProvider } from "../../common/gateways/fake-date.provider"
@@ -6,16 +6,19 @@ import { FakeMessageGateway } from "../gateways/fake.message.gateway"
 import {  DropMessageResponse } from "../gateways/message.gateway"
 import { DropMessageReceipt } from "../models/drop-message-receipt.model"
 import { FakeIdGenerator } from "../../common/gateways/fake-id.generator"
+import { MessageStore } from "../stores/message.store"
 
 export const createMessageFixture = ()=>{
     const messageGateway = new FakeMessageGateway()
     const dateProvider = new FakeDateProvider()
 
     const idGenerator = new FakeIdGenerator()
-    const dependencies: Partial<Dependencies> = {
+    const dependencies: Dependencies = {
         messageGateway, dateProvider, idGenerator
     }
-    let store : CoreStore = createTestCoreStore(dependencies)
+    const messageStore = new MessageStore(dependencies)
+    const storeBuilder = coreStore().withMessage(messageStore)
+    const store = storeBuilder.build()
 
     return {
         givenNowIs(now: Date){
@@ -25,7 +28,7 @@ export const createMessageFixture = ()=>{
             messageGateway.willReturnDropResponse(response)
         },
         givenPreviousError(err: Err){
-            store
+            messageStore.appendPreviousErr(err)
         },
         givenMessageId(messageId: string){
             idGenerator.willGenerate(messageId)
@@ -36,7 +39,6 @@ export const createMessageFixture = ()=>{
                 failureMessageGateway.willRejectWith(error)
                 dependencies.messageGateway = failureMessageGateway
             }
-            store = createTestCoreStore(dependencies)
             return store.message.drop(params)
         },
         thenReceiptOfMessageShouldEqual(messageId: string, expected: DropMessageReceipt){

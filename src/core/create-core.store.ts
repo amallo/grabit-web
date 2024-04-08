@@ -13,18 +13,39 @@ export type Dependencies = {
 }
 export class CoreStore{
     constructor(public readonly message: MessageStore){}
-
 }
 
-export const createTestCoreStore=(deps: Partial<Dependencies>)=>{
-    const testingDeps : Dependencies = {
-        idGenerator: new FakeIdGenerator(),
-        messageGateway: new FakeMessageGateway(),
-        dateProvider: new FakeDateProvider()
-    }
-    return createCoreStore({...testingDeps, ...deps})
+export const createTestCoreStore=(deps: Dependencies = {
+    idGenerator: new FakeIdGenerator(),
+    messageGateway: new FakeMessageGateway(),
+    dateProvider: new FakeDateProvider()
+})=>{
+    return createCoreStore(deps)
 }
 export const createCoreStore = (deps: Dependencies)=>{
     const messageStore = new MessageStore(deps)
     return  new CoreStore(messageStore)
+}
+
+class CoreStoreBuilder{
+    _message!: MessageStore
+    withMessageStore(message: MessageStore){
+        this._message = message
+        return this
+    }
+    build(){
+        return new CoreStore(this._message)
+    }
+}
+
+export const coreStore = ()=>{
+    const builder = new CoreStoreBuilder()
+    return {
+        withMessage(message: MessageStore){
+            return builder.withMessageStore(message)
+        },
+        build(){
+            return builder.build()
+        }
+    }
 }
