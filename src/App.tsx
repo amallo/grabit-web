@@ -1,16 +1,25 @@
-import React, { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { FormControl, FormLabel, FormHelperText, Textarea, Button, Text, Input } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
+import { useStore } from './components/store.context';
+import { createDropMessageViewModel } from './drop-message.viewmodel';
 
 function App() {
+  const store = useStore()
   const [message, setMessage] = useState<string | null>(null)
+
   const [willDropMessage, setDroppedMessage] = useState<string | null>(null)
+  const viewModel = useMemo(()=>createDropMessageViewModel(store), [])
+  
   const refInputMessage = useRef<HTMLTextAreaElement>(null)
   const dropMessage = ()=>{
-    setDroppedMessage(message)
-    setMessage(null)  
+    if (message == null) return;
+    viewModel.dropAnonymousMessage({content: message}).then(()=>{
+      setDroppedMessage(message)
+      setMessage(null)  
+    })
   }
   const cancelMessage = ()=>{
     setMessage(null)  
@@ -37,12 +46,8 @@ function App() {
                 <FormHelperText>Votre message sera immédiatement détruit dès sa première lecture.</FormHelperText>
               </>
               }
-             
-              
-              
-
-              {willDropMessage && 
-              <Input type='text' readOnly value="http://grabit.com/2H43Gdd775Gkml66v" backgroundColor={'gray'} />              
+              {willDropMessage && viewModel.lastReceipt &&
+              <Input type='text' readOnly value={`http://grabit.com/${viewModel.lastReceipt.value.id}`}  backgroundColor={'gray'} />              
               }
               
               {willDropMessage && 

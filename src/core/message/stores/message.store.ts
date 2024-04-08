@@ -8,7 +8,7 @@ export class MessageStore{
     readonly receiptsByMessage = signal<Record<string, DropMessageReceipt>>({});
     readonly errors = signal<Err[]>([]);
     readonly lastMessageId = signal<string|null>(null);
-    readonly lastReceipt = computed(()=> this.receiptsByMessage.value[this.lastMessageId.peek()||''])
+    readonly lastReceipt = computed(()=> this.receiptsByMessage.value[this.lastMessageId.value||''])
     constructor(private readonly deps: Dependencies){}
     async drop(params: Params){
         return createDropAnonymousMessage(this.deps)(params)

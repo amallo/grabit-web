@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 import { AppStore, createAppStore } from '../create-app.store';
 import { NanoIdGenerator } from '../core/common/gateways/nanoid.generator';
 import { InMemoryMessageGateway } from '../core/message/gateways/in-memory.message.gateway';
@@ -11,3 +11,8 @@ export const appStore = createAppStore({
       dateProvider : new RealDateProvider()
 })
 export const StoreContext = createContext<AppStore>(appStore);
+
+export const useStore = ()=>{
+    const store = useContext(StoreContext)
+    return store
+}
