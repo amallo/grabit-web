@@ -2,7 +2,7 @@ import { NanoIdGenerator } from "../../common/gateways/nanoid.generator";
 import { MessageGateway, DropAnonymousMessageRequest, DropMessageResponse } from "./message.gateway";
 
 export class InMemoryMessageGateway implements MessageGateway{
-    private receipts : Record<string, DropMessageResponse[]> = {}
+    private receipts : Record<string, DropMessageResponse> = {}
     constructor(private validityPeriodInHours: number, private receiptIdGenerator: NanoIdGenerator, private delay: number){
 
     }
@@ -15,7 +15,7 @@ export class InMemoryMessageGateway implements MessageGateway{
                     receipt: generatedReceiptId,
                     validUntil: new Date(new Date(message.at).getTime() + this.validityPeriodInHours * 3600 * 1000).toISOString()
                 }
-                this.receipts[generatedMessageId] = [...this.receipts[generatedMessageId], receipt].filter(Boolean)
+                this.receipts[generatedMessageId] = receipt
                 resolve(receipt)
             }, (Math.random() + 0.3) * this.delay);
         })
