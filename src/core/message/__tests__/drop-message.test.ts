@@ -23,7 +23,7 @@ describe("FEATURE: drop a message", ()=>{
         })
         messageFixture.thenNoErrors()
     })
-    test("fail to drop an anoymous message", async ()=>{
+    test("fail to drop an anoymous message because of gateway issue", async ()=>{
         const messageFixture = createMessageFixture()
         messageFixture.givenNowIs(new Date("2024-04-04T07:52:19.000Z"))
         messageFixture.givenWillDropMessageResponse({
