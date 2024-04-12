@@ -5,35 +5,13 @@ import { FormControl, FormLabel, FormHelperText, Textarea, Button, Text, Input }
 import { CopyIcon } from '@chakra-ui/icons';
 import { useStore } from './components/store.context';
 import { createDropMessageViewModel } from './drop-message.viewmodel';
+import { useAtom } from '@xoid/react';
 
 function App() {
   const store = useStore()
-  const [message, setMessage] = useState<string | null>(null)
+  const $atom = createDropMessageViewModel(store)
+  const viewModel = useAtom($atom)
 
-  const [willDropMessage, setDroppedMessage] = useState<string | null>(null)
-  const viewModel = useMemo(()=>createDropMessageViewModel(store), [])
-  
-  const refInputMessage = useRef<HTMLTextAreaElement>(null)
-  const dropMessage = ()=>{
-    if (message == null) return;
-    viewModel.dropAnonymousMessage({content: message}).then(()=>{
-      setDroppedMessage(message)
-      setMessage(null)  
-    })
-  }
-  const cancelMessage = ()=>{
-    setMessage(null)  
-    if (refInputMessage.current){
-      refInputMessage.current.value = ""
-    }
-  }
-  const restart = ()=>{
-    setMessage(null)  
-    if (refInputMessage.current){
-      refInputMessage.current.value = ""
-    }
-    setDroppedMessage(null)
-  }
   return (
     <div className="App">
       <header className="App-header">
@@ -41,21 +19,21 @@ function App() {
           <div style={{display: 'flex', flex: 1, gap: 16}}>
             <FormControl gap={16}>
               <FormLabel>Déposer un message privé</FormLabel>
-              {!willDropMessage &&<>
-                <Textarea ref={refInputMessage} placeholder='Entrez ici votre message' onChange={((e)=>setMessage(e.currentTarget.value))} />
+              {!viewModel.lastReceipt &&<>
+                <Textarea placeholder='Entrez ici votre message' onChange={((e)=>$atom.actions.enterAnonymousMessage(e.currentTarget.value))} />
                 <FormHelperText>Votre message sera immédiatement détruit dès sa première lecture.</FormHelperText>
               </>
               }
-              {willDropMessage && viewModel.lastReceipt &&
+              {viewModel.lastReceipt &&
               <Input type='text' readOnly value={`http://grabit.com/${viewModel.lastReceipt.value.id}`}  backgroundColor={'gray'} />              
               }
               
-              {willDropMessage && 
+              {viewModel.lastReceipt && 
               <FormHelperText color="GrayText" margin={0}>Vous pouvez envoyer ce lien dès maintenant à la personne de votre choix</FormHelperText>            
               }
               <div style={{display: 'flex', flex: 1, justifyContent: 'space-between', marginTop: 16 }}>
-              { !willDropMessage &&
-                <Button colorScheme='teal' onClick={()=> dropMessage()}>Déposer le message</Button>
+              { !viewModel.lastReceipt && viewModel.canSubmit &&
+                <Button colorScheme='teal' onClick={()=> $atom.actions.dropAnonymous()}>Déposer le message</Button>
               }
                 { message &&
                   <Button colorScheme='gray' onClick={()=>cancelMessage()}>Annuler</Button>
