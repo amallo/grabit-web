@@ -1,68 +1,46 @@
-import { batch, computed, signal } from "@preact/signals-react";
 import { Dependencies } from "../../create-core.store";
 import { DropMessageReceipt } from "../models/drop-message-receipt.model";
-import { Params, Result, createDropAnonymousMessage } from "../usecases/drop-message.usecase";
+import { Params,  createDropAnonymousMessage } from "../usecases/drop-message.usecase";
 import { Err } from "../../common/models/err.model";
+import create from "xoid";
 
-export class MessageState{
-    readonly receiptsByMessage = signal<Record<string, DropMessageReceipt>>({});
-    readonly errors = signal<Err[]>([]);
-    readonly lastMessageId = signal<string|null>(null);
-    readonly lastReceipt = computed(()=> this.receiptsByMessage.value[this.lastMessageId.value||''])
-    constructor(initial: {
-        receiptsByMessage: Record<string, DropMessageReceipt>, 
-        errors: Err[], 
-        lastMessageId: string|null
-    } = {
-       errors:  [],
-       lastMessageId : null,
-       receiptsByMessage: {} 
-    }){
-        this.receiptsByMessage.value = initial.receiptsByMessage
-        this.errors.value = initial.errors
-        this.lastMessageId.value = initial.lastMessageId
-    }
-    onMessageWasDropped(result: Result){
-        return batch(()=>{
-            this.lastMessageId.value = result.message
-            this.receiptsByMessage.value[result.message] = {droppedAt: result.at, id: result.receipt, validUntil: result.validUntil }  
-            this.errors.value = []
-        })
-    }
-    onDropMessageError(err: Err){
-        this.errors.value.push(err)
-    }
-    appendPreviousError(err: Err){
-        this.errors.value = this.errors.value.concat(err)
-    }
-}
+export type MessageState = {
+    receiptsByMessage: Record<string, DropMessageReceipt>
+    errors: Err[]
+    lastMessageId?: string
+} 
 
-export class MessageStore{
-    constructor(private readonly deps: Dependencies, private readonly state: MessageState = new MessageState()){}
-    async drop(params: Params){
-        return createDropAnonymousMessage(this.deps)(params)
-            .then((result)=>this.onMessageWasDropped(result))
-            .catch((e)=>this.onDropMessageError(e))
-    }
-    onMessageWasDropped(result: Result){
-        return this.state.onMessageWasDropped(result)
-    }
-    onDropMessageError(err: Err){
-        this.state.onDropMessageError(err)
-    }
-    appendPreviousErr(err: Err){
-        this.state.appendPreviousError(err)
-    }
-    get receiptsByMessage(){
-        return this.state.receiptsByMessage
-    }
-    get errors(){
-        return this.state.errors
-    }
-    get lastReceipt(){
-        return this.state.lastReceipt
-    }
-    get lastMessageId(){
-        return this.state.lastMessageId
-    }
+export const createMessageStore = (deps: Dependencies, state: MessageState = {receiptsByMessage: {}, errors: []})=>{
+   const $state = create(state, (atom)=>({
+        async dropAnonymous(params: Params){
+            try{
+                const result = await createDropAnonymousMessage(deps)(params);
+                const receipt : DropMessageReceipt = { droppedAt: result.at, id: result.receipt, validUntil: result.validUntil }
+                this.confirmReceipt(result.message, receipt)
+                return receipt
+            }
+            catch(e){
+                this.appendError(e as Err)
+            }
+        },
+        confirmReceipt(messageId: string, receipt: DropMessageReceipt){
+            atom.update((state)=>({
+                ...state,
+                lastMessageId: messageId
+            }))
+            const $receipts = atom.focus(s => s.receiptsByMessage[messageId])
+            $receipts.set(receipt)
+            const $errors = atom.focus(s => s.errors)
+            $errors.update(()=>[])
+        },
+        appendError(e: Err){
+            const $errors = atom.focus(s => s.errors)
+            $errors.update((errs)=>[...errs, e as Err])
+        }
+   }))
+
+
+   const $lastReceipt = create((read)=> read($state).receiptsByMessage[read($state).lastMessageId || '']  )
+   
+   return {$state, selectors: {$lastReceipt}} 
 }

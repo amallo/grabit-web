@@ -1,15 +1,46 @@
-import { computed } from "@preact/signals-react";
-import { Params } from "./core/message/usecases/drop-message.usecase";
+import create from "xoid";
 import { AppStore } from "./create-app.store";
-
-export const createDropMessageViewModel = (store: AppStore)=>{
-    const hasDropMessageFailure = computed(() => store.core.message.errors.value.length > 0);
-    return {
-        dropAnonymousMessage(params: Params){
-            return store.core.message.drop(params)
+import { useAtom } from "@xoid/react";
+import { useMemo } from "react";
+type ViewModelState = {
+    anonymousMessage: string
+}
+export const createDropMessageViewModel = ({$state: store}: AppStore)=>{ 
+    const initialState : ViewModelState = {
+        anonymousMessage: '',
+    }
+    const $state = create(initialState, (atom) => ({
+        enterAnonymousMessage: (message: string) => {
+           atom.set({
+                anonymousMessage: message
+           })
         },
-        hasDropMessageFailure,
-        lastReceipt: store.core.message.lastReceipt,
-        lastMessageId : store.core.message.lastMessageId
+        clearAnonymousMessage(){
+            atom.set({
+                anonymousMessage: ''
+            })
+        },
+        zero(){
+            this.clearAnonymousMessage()
+        },
+        async dropAnonymous(){
+            const r = await store.actions.dropAnonymous({ content: $state.value.anonymousMessage });
+            this.clearAnonymousMessage();
+        }
+    }))
+    const $canSubmit = create((read)=>read($state).anonymousMessage.length > 0)
+    return {$state, selectors: {$canSubmit}}
+}
+
+export const useDropMessageViewModel = (store: AppStore)=>{
+    const vm = useMemo(()=>createDropMessageViewModel(store), [])
+    const state = useAtom(vm.$state)
+    const canSubmit = useAtom(vm.selectors.$canSubmit)
+    const lastReceipt = useAtom(store.selectors.$lastReceipt)
+    return {
+        lastReceipt,
+        ...vm.$state.actions,
+        ...state,
+        canSubmit
     }
 }
