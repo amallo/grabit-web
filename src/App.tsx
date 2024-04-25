@@ -10,6 +10,11 @@ function App() {
   const store = useStore()
   const viewModel = useDropMessageViewModel(store)
 
+  const copyToClipboard = ()=>{
+    if (viewModel.lastReceipt){
+      navigator.clipboard.writeText(viewModel.lastReceipt.id)
+    }
+  }
   return (
     <div className="App">
       <header className="App-header">
@@ -37,7 +42,7 @@ function App() {
                   <Button colorScheme='gray' onClick={()=>viewModel.zero()}>Annuler</Button>
                 }
                 { viewModel.lastReceipt &&
-                  <Button leftIcon={<CopyIcon/>}  onClick={()=>viewModel.zero()}>Copier le lien</Button>
+                  <Button leftIcon={<CopyIcon/>}  onClick={()=>copyToClipboard()}>Copier le lien</Button>
                 }
                 { viewModel.lastReceipt &&
                   <Button colorScheme='gray' onClick={()=>viewModel.zero()}>Déposer un autre message</Button>

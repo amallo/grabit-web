@@ -1,3 +1,4 @@
+import { error } from "console"
 import { FakeDateProvider } from "../core/common/gateways/fake-date.provider"
 import { FakeIdGenerator } from "../core/common/gateways/fake-id.generator"
 import { FakeMessageGateway } from "../core/message/gateways/fake.message.gateway"
@@ -33,11 +34,11 @@ test("can submit message only if message entered", async ()=>{
 test("it displays receipt once received", async ()=>{
     const store = createAppStore({messageGateway, dateProvider, idGenerator})
     const viewModel = createDropMessageViewModel(store)
-    expect(store.selectors.$lastReceipt.value).toBeUndefined()
+    expect(viewModel.$state.value.lastReceipt).toBeUndefined()
     viewModel.$state.actions.enterAnonymousMessage("Hey jo")
     await viewModel.$state.actions.dropAnonymous()
     expect(viewModel.$state.value.anonymousMessage).toBe('')
-    expect(store.selectors.$lastReceipt.value).toEqual<DropMessageReceipt>({
+    expect(viewModel.$state.value.lastReceipt).toEqual<DropMessageReceipt>({
          droppedAt: '2024-04-04T07:52:19.000Z',
         id: 'receipt-0',
         validUntil: '2024-04-05T07:52:19.000Z'
@@ -47,9 +48,9 @@ test("it displays receipt once received", async ()=>{
 test("it initializes to send another message", async ()=>{
     const store = createAppStore({messageGateway, dateProvider, idGenerator})
     const viewModel = createDropMessageViewModel(store)
-    expect(store.selectors.$lastReceipt.value).toBeUndefined()
+    expect(viewModel.$state.value.lastReceipt).toBeUndefined()
     viewModel.$state.actions.zero()
     expect(viewModel.$state.value.anonymousMessage).toBe('')
-    expect(store.selectors.$lastReceipt.value).toBeUndefined()
+    expect(viewModel.$state.value.lastReceipt).toBeUndefined()
     expect(viewModel.selectors.$canSubmit.value).toBeFalsy()
 })

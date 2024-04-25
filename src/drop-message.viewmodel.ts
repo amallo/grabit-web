@@ -2,22 +2,38 @@ import create from "xoid";
 import { AppStore } from "./create-app.store";
 import { useAtom } from "@xoid/react";
 import { useMemo } from "react";
+import { DropMessageReceipt } from "./core/message/models/drop-message-receipt.model";
 type ViewModelState = {
     anonymousMessage: string
+    clipboard: string
+    lastReceipt?: DropMessageReceipt
 }
-export const createDropMessageViewModel = ({$state: store}: AppStore)=>{ 
+export const createDropMessageViewModel = (store: AppStore)=>{ 
     const initialState : ViewModelState = {
         anonymousMessage: '',
+        clipboard: ''
     }
     const $state = create(initialState, (atom) => ({
         enterAnonymousMessage: (message: string) => {
            atom.set({
+                clipboard: '',
                 anonymousMessage: message
            })
         },
         clearAnonymousMessage(){
             atom.set({
+                clipboard: '',
                 anonymousMessage: ''
+            })
+        },
+        receivedAReceipt(r: DropMessageReceipt | undefined){
+            atom.update((state)=>{
+                return {
+                    ...state,
+                    lastReceipt: r,
+                    clipboard: '',
+                    anonymousMessage: ''
+                }
             })
         },
         zero(){
@@ -25,7 +41,7 @@ export const createDropMessageViewModel = ({$state: store}: AppStore)=>{
         },
         async dropAnonymous(){
             const r = await store.actions.dropAnonymous({ content: $state.value.anonymousMessage });
-            this.clearAnonymousMessage();
+            this.receivedAReceipt(r)
         }
     }))
     const $canSubmit = create((read)=>read($state).anonymousMessage.length > 0)
@@ -36,9 +52,7 @@ export const useDropMessageViewModel = (store: AppStore)=>{
     const vm = useMemo(()=>createDropMessageViewModel(store), [])
     const state = useAtom(vm.$state)
     const canSubmit = useAtom(vm.selectors.$canSubmit)
-    const lastReceipt = useAtom(store.selectors.$lastReceipt)
     return {
-        lastReceipt,
         ...vm.$state.actions,
         ...state,
         canSubmit

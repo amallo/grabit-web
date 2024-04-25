@@ -15,7 +15,7 @@ export const createMessageFixture = ()=>{
     const dependencies: Dependencies = {
         messageGateway, dateProvider, idGenerator
     }
-    const {$state: store} = createMessageStore(dependencies)
+    const store = createMessageStore(dependencies)
     
     return {
         givenNowIs(now: Date){

@@ -4,7 +4,7 @@ import { FakeIdGenerator } from "./common/gateways/fake-id.generator";
 import { FakeMessageGateway } from "./message/gateways/fake.message.gateway";
 import { DateProvider } from "./common/gateways/date.prodivder";
 import { FakeDateProvider } from "./common/gateways/fake-date.provider";
-import { createMessageStore } from "./message/stores/message.store";
+import { MessageState, createMessageStore } from "./message/stores/message.store";
 
 export type Dependencies = {
     idGenerator: IdGenerator
@@ -19,8 +19,8 @@ export const createTestCoreStore=(deps: Dependencies = {
 })=>{
     return createCoreStore(deps)
 }
-export const createCoreStore = (deps: Dependencies)=>{
-    const messageStore = createMessageStore(deps)
+export const createCoreStore = (deps: Dependencies, state?: MessageState)=>{
+    const messageStore = createMessageStore(deps, state)
     return messageStore
 }
 

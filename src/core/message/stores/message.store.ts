@@ -7,7 +7,6 @@ import create from "xoid";
 export type MessageState = {
     receiptsByMessage: Record<string, DropMessageReceipt>
     errors: Err[]
-    lastMessageId?: string
 } 
 
 export const createMessageStore = (deps: Dependencies, state: MessageState = {receiptsByMessage: {}, errors: []})=>{
@@ -26,7 +25,6 @@ export const createMessageStore = (deps: Dependencies, state: MessageState = {re
         confirmReceipt(messageId: string, receipt: DropMessageReceipt){
             atom.update((state)=>({
                 ...state,
-                lastMessageId: messageId
             }))
             const $receipts = atom.focus(s => s.receiptsByMessage[messageId])
             $receipts.set(receipt)
@@ -38,9 +36,5 @@ export const createMessageStore = (deps: Dependencies, state: MessageState = {re
             $errors.update((errs)=>[...errs, e as Err])
         }
    }))
-
-
-   const $lastReceipt = create((read)=> read($state).receiptsByMessage[read($state).lastMessageId || '']  )
-   
-   return {$state, selectors: {$lastReceipt}} 
+   return $state
 }

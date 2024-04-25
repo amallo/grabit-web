@@ -1,13 +1,13 @@
 import { createContext, useContext } from 'react';
 import { AppStore, createAppStore } from '../create-app.store';
 import { NanoIdGenerator } from '../core/common/gateways/nanoid.generator';
-import { InMemoryMessageGateway } from '../core/message/gateways/in-memory.message.gateway';
 import { RealDateProvider } from '../core/common/gateways/real-date.provider';
+import { HttpMessageGateway } from '../core/message/gateways/http.message.gateway';
 
 
 export const appStore = createAppStore({
       idGenerator: new NanoIdGenerator(),
-      messageGateway : new InMemoryMessageGateway(0.1, new NanoIdGenerator(), 300),
+      messageGateway : new HttpMessageGateway(),
       dateProvider : new RealDateProvider()
 })
 export const StoreContext = createContext<AppStore>(appStore);
