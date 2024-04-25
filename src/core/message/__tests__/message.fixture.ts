@@ -7,6 +7,7 @@ import {  DropMessageResponse } from "../gateways/message.gateway"
 import { DropMessageReceipt } from "../models/drop-message-receipt.model"
 import { FakeIdGenerator } from "../../common/gateways/fake-id.generator"
 import {  createMessageStore } from "../stores/message.store"
+import { Message } from "../models/message.model"
 export const createMessageFixture = ()=>{
     const messageGateway = new FakeMessageGateway()
     const dateProvider = new FakeDateProvider()
@@ -30,6 +31,9 @@ export const createMessageFixture = ()=>{
         givenMessageId(messageId: string){
             idGenerator.willGenerate(messageId)
         },
+        givenGrabbedMessage(message: Message){
+            messageGateway.willGrabMessage(message)
+        },
         whenDroppingAnonymousMessage(params: {content: string}, error?: Error){
             if (error){
                 const failureMessageGateway = new FailureMessageGateway()
@@ -38,14 +42,28 @@ export const createMessageFixture = ()=>{
             }
             return store.actions.dropAnonymous(params)
         },
+        whenGrabbingMessage(receiptId: string,  error?: Error){
+            if (error){
+                const failureMessageGateway = new FailureMessageGateway()
+                failureMessageGateway.willRejectWith(error)
+                dependencies.messageGateway = failureMessageGateway
+            }
+            return store.actions.grab(receiptId)
+        },
         thenReceiptOfMessageShouldEqual(messageId: string, expected: DropMessageReceipt){
             expect(store.value.receiptsByMessage[messageId]).toEqual(expected)
         },
-        thenDroppingAnonymousMessageShouldFailWith(err: Err){
+        thenShouldFailWith(err: Err){
             expect(store.value.errors).toContainEqual(err)
         },
         thenNoErrors(){
             expect(store.value.errors).toEqual([])
+        },
+        thenDeliveredMessageShouldBe(message: Message){
+            expect(store.value.lastMessage).toEqual(message)
+        },
+        thenGrabHasBeenCalledWith(receiptId: string){
+            expect(messageGateway.wasGrabbedWith()).toBe(receiptId)
         }
     }
     

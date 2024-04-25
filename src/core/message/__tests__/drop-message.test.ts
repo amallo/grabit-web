@@ -31,7 +31,7 @@ describe("FEATURE: drop a message", ()=>{
             validUntil: '2024-04-04T10:52:19+02:00',
         })
         await messageFixture.whenDroppingAnonymousMessage({content: 'my credit card number'}, new Error("gateway failure"))
-        messageFixture.thenDroppingAnonymousMessageShouldFailWith({
+        messageFixture.thenShouldFailWith({
             code: 'DROP_MESSAGE_ERROR',
             causedBy: 'GATEWAY_ERROR',
             message: 'gateway failure',
