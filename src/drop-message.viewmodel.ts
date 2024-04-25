@@ -73,14 +73,21 @@ export const useDropMessageViewModel = (store: AppStore)=>{
     const zero =()=>{
         setClipboard("")
         setAnonymousMessage("")
+        receivedLastReceipt(undefined)
+    }
+    const copy = ()=>{
+        if (!lastReceipt) return
+        setClipboard(lastReceipt.id)
     }
     return {
+        clipboard,
         enterAnonymousMessage,
         anonymousMessage,
         canSubmit,
         lastReceipt,
         dropAnonymous,
-        zero
+        zero,
+        copy
     }
 }
 

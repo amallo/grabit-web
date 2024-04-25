@@ -1,19 +1,20 @@
-import { useMemo, useRef, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { FormControl, FormLabel, FormHelperText, Textarea, Button, Text, Input } from '@chakra-ui/react';
-import { CopyIcon } from '@chakra-ui/icons';
+import { FormControl, FormLabel, FormHelperText, Textarea, Button, Text, Input, useClipboard } from '@chakra-ui/react';
+import { CheckIcon, CopyIcon } from '@chakra-ui/icons';
 import { useStore } from './components/store.context';
 import { useDropMessageViewModel } from './drop-message.viewmodel';
 
 function App() {
   const store = useStore()
   const viewModel = useDropMessageViewModel(store)
+  const { onCopy, value, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
+  
 
   const copyToClipboard = ()=>{
-    if (viewModel.lastReceipt){
-      navigator.clipboard.writeText(viewModel.lastReceipt.id)
-    }
+      viewModel.copy()
+      setValue(viewModel.clipboard)
+      onCopy()
   }
   return (
     <div className="App">
@@ -28,7 +29,7 @@ function App() {
               </>
               }
               {viewModel.lastReceipt &&
-              <Input type='text' readOnly value={`http://grabit.com/${viewModel.lastReceipt?.id}`}  backgroundColor={'gray'} />              
+              <Input type='text' readOnly value={`${viewModel.lastReceipt?.id}`}  backgroundColor={'gray'} />              
               }
               
               {viewModel.lastReceipt && 
@@ -42,7 +43,7 @@ function App() {
                   <Button colorScheme='gray' onClick={()=>viewModel.zero()}>Annuler</Button>
                 }
                 { viewModel.lastReceipt &&
-                  <Button leftIcon={<CopyIcon/>}  onClick={()=>copyToClipboard()}>Copier le lien</Button>
+                  <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyToClipboard()}>{hasCopied ? 'Copié !': 'Copier le lien'}</Button>
                 }
                 { viewModel.lastReceipt &&
                   <Button colorScheme='gray' onClick={()=>viewModel.zero()}>Déposer un autre message</Button>

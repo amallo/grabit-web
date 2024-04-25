@@ -11,7 +11,7 @@ let dateProvider: FakeDateProvider
 let idGenerator: FakeIdGenerator
 let store: AppStore
 
-const setuo=(appStore: AppStore)=>{
+const setup=(appStore: AppStore)=>{
     return renderHook(() => useDropMessageViewModel(appStore))
 }
 
@@ -29,7 +29,7 @@ beforeEach(()=>{
     store = createAppStore({messageGateway, dateProvider, idGenerator})
 })
 test("can submit message only if message entered", async ()=>{
-    const {result} = setuo(store)
+    const {result} = setup(store)
     expect(result.current.canSubmit).toBe(false)
     act(()=>{
         result.current.enterAnonymousMessage("Hey jo")
@@ -39,7 +39,7 @@ test("can submit message only if message entered", async ()=>{
 })
 
 test("it displays receipt once received", async ()=>{
-    const {result} = setuo(store)
+    const {result} = setup(store)
     expect(result.current.lastReceipt).toBeUndefined()
     await act(()=>{
         result.current.enterAnonymousMessage("Hey jo")
@@ -54,11 +54,31 @@ test("it displays receipt once received", async ()=>{
     expect(result.current.canSubmit).toBe(false)
 })
 
-test("sends another message", async ()=>{
-    const {result} = setuo(store)
+test("resend another message", async ()=>{
+    const {result} = setup(store)
     expect(result.current.lastReceipt).toBeUndefined()
-    result.current.zero()
+    await act(()=>{
+        result.current.enterAnonymousMessage("Hey jo")
+        return result.current.dropAnonymous()
+    })
+    act(()=>{
+        result.current.zero()
+    })
     expect(result.current.anonymousMessage).toBe('')
     expect(result.current.lastReceipt).toBeUndefined()
+    expect(result.current.canSubmit).toBeFalsy()
+})
+
+test("copy message link", async ()=>{
+    const {result} = setup(store)
+    expect(result.current.lastReceipt).toBeUndefined()
+    await act(()=>{
+        result.current.enterAnonymousMessage("Hey jo")
+        return result.current.dropAnonymous()
+    })
+    act(()=>{
+        result.current.copy()
+    })
+    expect(result.current.clipboard).toBe(result.current.lastReceipt?.id)
     expect(result.current.canSubmit).toBeFalsy()
 })
