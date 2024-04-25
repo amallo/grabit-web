@@ -1,7 +1,7 @@
 import create from "xoid";
 import { AppStore } from "./create-app.store";
 import { useAtom } from "@xoid/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DropMessageReceipt } from "./core/message/models/drop-message-receipt.model";
 type ViewModelState = {
     anonymousMessage: string
@@ -49,12 +49,39 @@ export const createDropMessageViewModel = (store: AppStore)=>{
 }
 
 export const useDropMessageViewModel = (store: AppStore)=>{
-    const vm = useMemo(()=>createDropMessageViewModel(store), [])
-    const state = useAtom(vm.$state)
-    const canSubmit = useAtom(vm.selectors.$canSubmit)
+    const [anonymousMessage, setAnonymousMessage] = useState("")
+    const [clipboard, setClipboard] = useState("")
+    const [lastReceipt, receivedLastReceipt] = useState<DropMessageReceipt | undefined>()
+    const [canSubmit, setCanSubmit] = useState(anonymousMessage.length > 0)
+
+    useEffect(()=>{
+        setCanSubmit(anonymousMessage.length > 0)
+    }, [anonymousMessage])
+    
+    const enterAnonymousMessage = (message: string)=>{
+        setAnonymousMessage(message)
+    }
+    const onReceipt = (r: DropMessageReceipt | undefined)=>{
+        receivedLastReceipt(r)
+        setClipboard("")
+        setAnonymousMessage("")
+    }
+    const dropAnonymous = async()=>{
+        const r = await store.actions.dropAnonymous({ content: anonymousMessage });
+        onReceipt(r)
+    }
+    const zero =()=>{
+        setClipboard("")
+        setAnonymousMessage("")
+    }
     return {
-        ...vm.$state.actions,
-        ...state,
-        canSubmit
+        enterAnonymousMessage,
+        anonymousMessage,
+        canSubmit,
+        lastReceipt,
+        dropAnonymous,
+        zero
     }
 }
+
+export type DropMessageViewModel = ReturnType<typeof useDropMessageViewModel>
