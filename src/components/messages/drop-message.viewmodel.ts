@@ -1,8 +1,8 @@
 import create from "xoid";
-import { AppStore } from "./create-app.store";
+import { AppStore } from "../../create-app.store";
 import { useAtom } from "@xoid/react";
 import { useEffect, useMemo, useState } from "react";
-import { DropMessageReceipt } from "./core/message/models/drop-message-receipt.model";
+import { DropMessageReceipt } from "../../core/message/models/drop-message-receipt.model";
 type ViewModelState = {
     anonymousMessage: string
     clipboard: string

@@ -1,13 +1,14 @@
 {
+
   "name": "grabit-web",
   "version": "0.1.0",
-  "proxy": "http://localhost:8080",
   "private": true,
   "jest": {
     "testMatch": [
       "**/?(*.)+(spec|test).[jt]s?(x)"
     ]
   },
+  "proxy" : "http://localhost:8080",
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
@@ -34,7 +35,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "cp -R ./build/ ../grabit-api/public"
   },
   "eslintConfig": {
     "extends": [

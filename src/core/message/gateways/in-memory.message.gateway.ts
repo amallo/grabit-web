@@ -1,4 +1,5 @@
 import { NanoIdGenerator } from "../../common/gateways/nanoid.generator";
+import { Message } from "../models/message.model";
 import { MessageGateway, DropAnonymousMessageRequest, DropMessageResponse } from "./message.gateway";
 
 export class InMemoryMessageGateway implements MessageGateway{
@@ -20,4 +21,8 @@ export class InMemoryMessageGateway implements MessageGateway{
             }, (Math.random() + 0.3) * this.delay);
         })
     }
+    grab(receiptId: string): Promise<Message> {
+        throw new Error("Method not implemented.");
+    }
+    
 }

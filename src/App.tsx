@@ -1,55 +1,23 @@
 import logo from './logo.svg';
 import './App.css';
-import { FormControl, FormLabel, FormHelperText, Textarea, Button, Text, Input, useClipboard } from '@chakra-ui/react';
-import { CheckIcon, CopyIcon } from '@chakra-ui/icons';
-import { useStore } from './components/store.context';
-import { useDropMessageViewModel } from './drop-message.viewmodel';
+import { DropFormControl } from './components/messages/drop.form';
 
+type Form = "grab" | "drop"
 function App() {
-  const store = useStore()
-  const viewModel = useDropMessageViewModel(store)
-  const { onCopy, value, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
-  
+  /*const [form, setForm] = useState<Form>("grab")
 
-  const copyToClipboard = ()=>{
-      viewModel.copy()
-      setValue(viewModel.clipboard)
-      onCopy()
-  }
+  useEffect(()=>{
+    const searchParams = new URLSearchParams(window.location.search);
+    const op: Form = searchParams.get('op') as Form;
+    setForm(op)
+  }, [window.location.search])*/
+
   return (
     <div className="App">
       <header className="App-header">
           <img src={logo} alt="logo" />
           <div style={{display: 'flex', flex: 1, gap: 16}}>
-            <FormControl gap={16}>
-              <FormLabel>Déposer un message privé</FormLabel>
-              {!viewModel.lastReceipt &&<>
-                <Textarea placeholder='Entrez ici votre message' onChange={((e)=>viewModel.enterAnonymousMessage(e.currentTarget.value))} />
-                <FormHelperText>Votre message sera immédiatement détruit dès sa première lecture.</FormHelperText>
-              </>
-              }
-              {viewModel.lastReceipt &&
-              <Input type='text' readOnly value={`${viewModel.lastReceipt?.id}`}  backgroundColor={'gray'} />              
-              }
-              
-              {viewModel.lastReceipt && 
-              <FormHelperText color="GrayText" margin={0}>Vous pouvez envoyer ce lien dès maintenant à la personne de votre choix</FormHelperText>            
-              }
-              <div style={{display: 'flex', flex: 1, justifyContent: 'space-between', marginTop: 16 }}>
-              { viewModel.canSubmit &&
-                <Button colorScheme='teal' onClick={()=> viewModel.dropAnonymous()}>Déposer le message</Button>
-              }
-                { viewModel.canSubmit &&
-                  <Button colorScheme='gray' onClick={()=>viewModel.zero()}>Annuler</Button>
-                }
-                { viewModel.lastReceipt &&
-                  <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyToClipboard()}>{hasCopied ? 'Copié !': 'Copier le lien'}</Button>
-                }
-                { viewModel.lastReceipt &&
-                  <Button colorScheme='gray' onClick={()=>viewModel.zero()}>Déposer un autre message</Button>
-                }
-              </div>
-            </FormControl>
+            <DropFormControl/>
           </div>
       </header>
     </div>

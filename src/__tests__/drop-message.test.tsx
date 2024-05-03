@@ -3,7 +3,7 @@ import { FakeIdGenerator } from "../core/common/gateways/fake-id.generator"
 import { FakeMessageGateway } from "../core/message/gateways/fake.message.gateway"
 import { DropMessageReceipt } from "../core/message/models/drop-message-receipt.model"
 import { AppStore, createAppStore } from "../create-app.store"
-import { createDropMessageViewModel, useDropMessageViewModel } from "../drop-message.viewmodel"
+import { createDropMessageViewModel, useDropMessageViewModel } from "../components/messages/drop-message.viewmodel"
 import { act, renderHook } from "@testing-library/react"
 
 let messageGateway: FakeMessageGateway
