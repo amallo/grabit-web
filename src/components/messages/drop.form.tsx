@@ -22,11 +22,13 @@ export const DropFormControl = ()=>{
 
   const retry = ()=>{
     viewModel.zero()
-    toast.closeAll()
   }
 
   useEffect(()=>{
-    if (!viewModel.hasError) return;
+    if (!viewModel.hasError) {
+      toast.closeAll()
+      return;
+    }
     toast({
       title: "Oups ! 🙈",
       description: <ErrorDescription/>,
