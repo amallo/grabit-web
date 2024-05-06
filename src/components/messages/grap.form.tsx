@@ -17,8 +17,6 @@ export const GrabFormControl = ({receiptId}: Props)=>{
           isClosable: true,
         })
       }, 300)
-      
-
     }
     const toast = useToast()
     return <FormControl gap={16} flex={1}>

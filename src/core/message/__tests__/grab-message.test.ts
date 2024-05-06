@@ -24,7 +24,7 @@ describe("FEATURE: grab a message", ()=>{
 
     test("fail to grab message", async ()=>{
         const messageFixture = createMessageFixture()
-        await messageFixture.whenGrabbingMessage({content: 'my credit card number'}, new Error("gateway failure"))
+        await messageFixture.whenGrabbingMessage('my credit card number', new Error("gateway failure"))
         messageFixture.thenShouldFailWith({
             code: 'GRAB_MESSAGE_ERROR',
             causedBy: 'GATEWAY_ERROR',

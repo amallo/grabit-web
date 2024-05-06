@@ -9,7 +9,6 @@ export class HttpMessageGateway implements MessageGateway{
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                // 'Content-Type': 'application/x-www-form-urlencoded',
             }
         })
         if (result.ok){

@@ -25,6 +25,10 @@ export const createMessageStore = (deps: Dependencies, state: MessageState = {re
                 this.appendError(e as Err)
             }
         },
+        clearErrors(){
+            const $errors = atom.focus(s => s.errors)
+            $errors.update(()=>[])
+        },
         async grab(receiptId: string){
             try{
                 const result = await createGrabMessage(deps)(receiptId)
