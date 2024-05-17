@@ -17,7 +17,21 @@ export class HttpMessageGateway implements MessageGateway{
         const error = await result.json()
         throw error
     }
-    grab(receiptId: string): Promise<Message> {
-        throw new Error("Method not implemented.");
+   async grab(receiptId: string): Promise<Message> {
+        const result = await fetch(`/api/grab/${receiptId}`, {
+            body: receiptId,
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        if (result.ok){
+            return result.json()
+        }
+        
+        const error = await result.json()
+        console.log("result.ok", result.ok)
+        
+        throw error
     }
 }

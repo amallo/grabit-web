@@ -8,6 +8,7 @@ export const createGrabMessage = (deps: Dependencies)=>{
             return await deps.messageGateway.grab(receiptId)
         }
         catch(e){
+            console.log("createGrabMessage", e)
             throw makeErr("GRAB_MESSAGE_ERROR", "GATEWAY_ERROR", e as Error)
         }
     }

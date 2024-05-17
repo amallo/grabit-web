@@ -35,6 +35,7 @@ export const DropFormControl = ()=>{
       //description: `Votre message n'a pas pu être envoyé. Vous pouvez réessayer ou nous contacter à contact@app2b.io si le problème persiste. On est là pour vous aider !`,
       status: 'error',
       duration: 9000,
+      position: "top-right",
       isClosable: true,
       
     })
@@ -44,7 +45,7 @@ export const DropFormControl = ()=>{
               <FormLabel>Déposer un message privé</FormLabel>
               {!viewModel.lastReceipt &&<>
                 <Textarea 
-                    placeholder={viewModel.hasError ? 'Prêt pour un nouvel essai ?' : 'Entrez ici votre message'}
+                    placeholder={viewModel.hasError ? 'Prêt pour un nouvel essai ? Cliquez sur Recommencer' : 'Entrez ici votre message'}
                     value={viewModel.anonymousMessage} 
                     readOnly={viewModel.hasError}
                     borderColor={viewModel.hasError ? 'tomato' : undefined} 
