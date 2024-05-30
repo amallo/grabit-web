@@ -1,5 +1,6 @@
 import { Dependencies } from "../../create-core.store"
 import { makeErr } from "../../common/models/err.model"
+import { createAppAsyncThunk } from "../../create-core-thunk"
 
 export type Params = {
     content: string
@@ -23,3 +24,22 @@ export const createDropAnonymousMessage = (deps: Dependencies)=>{
         }
     }
 }
+
+export const dropMessage = createAppAsyncThunk(
+    "messages/drop",
+    async (
+      {content}: { content: string },
+      { extra: { dateProvider, idGenerator, messageGateway }, rejectWithValue }
+    ) => {
+        const now = dateProvider.now()
+        try{
+            const willGenerateMessageId = idGenerator.generate()
+            const response = await messageGateway.dropAnonymous({content: content, at: now, messageId: willGenerateMessageId})
+            return  {receipt: response.receipt, at: now, validUntil: response.validUntil, message: willGenerateMessageId }
+        }
+        catch(e){
+            return rejectWithValue(makeErr("DROP_MESSAGE_ERROR", "GATEWAY_ERROR", e as Error))
+        }
+    }
+  );
+  

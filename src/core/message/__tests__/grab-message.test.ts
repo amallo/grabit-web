@@ -5,7 +5,7 @@ describe("FEATURE: grab a message", ()=>{
     test("grab a message by receipt", async ()=>{
         const messageFixture = createMessageFixture()
         messageFixture.givenNowIs(new Date("2024-04-04T07:52:19.000Z"))
-        messageFixture.givenWillDropMessageResponse({
+        messageFixture.givenWillReturnDropResponse({
             receipt: 'receipt0',
             validUntil: '2024-04-04T10:52:19+02:00',
         })
@@ -14,9 +14,9 @@ describe("FEATURE: grab a message", ()=>{
             causedBy: 'GATEWAY_ERROR',
             message: 'gateway failure',
         })
-        messageFixture.givenGrabbedMessage({content: "my credit card number"})
+        messageFixture.givenWillGrabMessage({content: "my credit card number"})
         await messageFixture.whenGrabbingMessage("receipt0")
-        messageFixture.thenDeliveredMessageShouldBe({content: "my credit card number"})
+        messageFixture.thenGrabbedMessageShouldBe({content: "my credit card number"})
         messageFixture.thenGrabHasBeenCalledWith("receipt0")
         messageFixture.thenNoErrors()
     })

@@ -1,18 +1,32 @@
-import { FormControl, FormLabel, Textarea, Button, useToast } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { FormControl, FormLabel, Textarea, Button, useToast, useClipboard } from "@chakra-ui/react"
+import { useCallback, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useStore } from "../store.context"
+import { useAtom } from "@xoid/react"
+import { CheckIcon, CopyIcon } from "@chakra-ui/icons"
 type GrabStatus = "ready"| "destroyed"|'failure'
 export const GrabFormControl = ()=>{
     const [grabStatus, setGrabStatus] = useState<GrabStatus>("ready")
     const {receiptId} = useParams()
     const store = useStore()
+    const { onCopy, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
+
+   const state = useAtom(store)
+
     const grab = async ()=>{
       if (!receiptId){
         throw new Error("Receipt id not found")
       }
       return store.actions.grab(receiptId)
     }
+
+    const copyMessage = useCallback(()=>{
+      if (!state.lastMessage) return
+      setValue(state.lastMessage.content)
+      onCopy()
+    }, [state.lastMessage])
+
+
     useEffect(()=>{
       if (!receiptId){
         throw new Error("Receipt id not found")
@@ -20,16 +34,17 @@ export const GrabFormControl = ()=>{
     }, [receiptId])
 
     useEffect(()=>{
-      console.log("store.value.errors", store.value.errors)
-      if (store.value.lastMessage){
+      if (state.lastMessage){
+        
+        setValue(state.lastMessage.content)
         setGrabStatus("destroyed")
         return
       }
-      if (store.value.errors.length > 0){
+      if (state.errors.length > 0){
         setGrabStatus("failure")
         return
       }
-    }, [store.value.errors])
+    }, [state.errors, state.lastMessage])
 
     useEffect(()=>{
       switch(grabStatus){
@@ -38,7 +53,7 @@ export const GrabFormControl = ()=>{
             title: 'Félicitations !',
             description: `Le message ${receiptId} a bien été lu. Vous pouvez maintenant le copier/coller pour le conserver.`,
             status: 'success',
-            duration: 9000,
+            duration: 6000,
             isClosable: true,
           })
           return
@@ -46,7 +61,7 @@ export const GrabFormControl = ()=>{
         case 'failure':{
           toast({
             title: 'Message introuvable',
-            description: `Hmm, il semble que le message n'existe plus.`,
+            description: `Hmm, il semble que ce message n'existe plus.`,
             status: 'error',
             duration: 9000,
             isClosable: true,
@@ -59,7 +74,7 @@ export const GrabFormControl = ()=>{
     const toast = useToast()
     return <FormControl gap={16} flex={1}>
               {grabStatus === "ready" && <FormLabel flex={1}>Lire et détruire le message {receiptId} ?</FormLabel>}
-              {(grabStatus === "destroyed" || grabStatus === "failure" ) && <FormLabel flex={1}>Le message {receiptId} a bien été lu et n'est plus accessible.</FormLabel>}
+              {(grabStatus === "destroyed" ) && <FormLabel flex={1}>Le message {receiptId} n'est désormais plus accessible.</FormLabel>}
               { grabStatus === "ready" && 
                 <div style={{flex:1, gap:16, display: 'flex', justifyContent: 'space-between'}}>
                   <Button flex={1} colorScheme='teal' onClick={()=>grab()}>Oui je suis prêt !</Button>
@@ -67,9 +82,10 @@ export const GrabFormControl = ()=>{
                 </div>
               }
               { grabStatus === "destroyed" && store.value.lastMessage &&
-                <>
-                  <Textarea value={store.value.lastMessage.content} disabled backgroundColor={"Highlight"}  />
-                </>
+                <div style={{display: 'flex', flex:1, gap: 16, flexDirection: 'column'}}>
+                  <Textarea style={{border: 0}} value={store.value.lastMessage.content} disabled backgroundColor={"Highlight"}  />
+                  <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyMessage()}>{hasCopied ? 'Copié !': 'Copier le message'}</Button>
+                </div>
               }
           </FormControl>
 }

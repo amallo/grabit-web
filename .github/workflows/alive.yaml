@@ -1,0 +1,19 @@
+name: Alive
+run-name: ${{ github.actor }} Alive web site 🚀
+on:
+  workflow_dispatch:
+jobs:
+  Alive-VPS:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            rm -rf /var/www/appartement-mogador-web/latest
+            cp -R /var/www/appartement-mogador-web/current/dist /var/www/appartement-mogador-web/latest
+            sudo systemctl reload caddy

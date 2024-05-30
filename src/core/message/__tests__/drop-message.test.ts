@@ -5,7 +5,7 @@ describe("FEATURE: drop a message", ()=>{
     test("drop an anoymous message", async ()=>{
         const messageFixture = createMessageFixture()
         messageFixture.givenNowIs(new Date("2024-04-04T07:52:19.000Z"))
-        messageFixture.givenWillDropMessageResponse({
+        messageFixture.givenWillReturnDropResponse({
             receipt: 'receipt0',
             validUntil: '2024-04-04T10:52:19+02:00',
         })
@@ -14,7 +14,7 @@ describe("FEATURE: drop a message", ()=>{
             causedBy: 'GATEWAY_ERROR',
             message: 'gateway failure',
         })
-        messageFixture.givenMessageId("message0")
+        messageFixture.givenWillGenerateMessageId("message0")
         await messageFixture.whenDroppingAnonymousMessage({content: 'my credit card number'})
         messageFixture.thenReceiptOfMessageShouldEqual("message0",{
             id: 'receipt0',
@@ -26,7 +26,7 @@ describe("FEATURE: drop a message", ()=>{
     test("fail to drop an anoymous message because of gateway issue", async ()=>{
         const messageFixture = createMessageFixture()
         messageFixture.givenNowIs(new Date("2024-04-04T07:52:19.000Z"))
-        messageFixture.givenWillDropMessageResponse({
+        messageFixture.givenWillReturnDropResponse({
             receipt: 'receipt0',
             validUntil: '2024-04-04T10:52:19+02:00',
         })

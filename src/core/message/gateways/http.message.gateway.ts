@@ -19,8 +19,7 @@ export class HttpMessageGateway implements MessageGateway{
     }
    async grab(receiptId: string): Promise<Message> {
         const result = await fetch(`/api/grab/${receiptId}`, {
-            body: receiptId,
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 "Content-Type": "application/json",
             }
@@ -30,8 +29,6 @@ export class HttpMessageGateway implements MessageGateway{
         }
         
         const error = await result.json()
-        console.log("result.ok", result.ok)
-        
         throw error
     }
 }
