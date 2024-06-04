@@ -1,7 +1,9 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import { messagesSlice } from "./message/models/message.reducer";
+import { grabSlice } from "./message/models/grab.reducer";
+import { dropSlice } from "./message/models/drop.reducer";
 
 export const coreReducer = combineReducers({
-    message: messagesSlice.reducer,
+    grab: grabSlice.reducer,
+    drop: dropSlice.reducer
   });
   

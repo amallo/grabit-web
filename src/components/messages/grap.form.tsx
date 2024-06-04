@@ -1,30 +1,36 @@
 import { FormControl, FormLabel, Textarea, Button, useToast, useClipboard } from "@chakra-ui/react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { useStore } from "../store.context"
-import { useAtom } from "@xoid/react"
 import { CheckIcon, CopyIcon } from "@chakra-ui/icons"
-type GrabStatus = "ready"| "destroyed"|'failure'
+import { useDispatch, useSelector } from "react-redux"
+import { createGrabMessageViewModel } from "./grab-message.viewmodel"
+import { AppDispatch } from "../../core/create-core.store"
 export const GrabFormControl = ()=>{
-    const [grabStatus, setGrabStatus] = useState<GrabStatus>("ready")
     const {receiptId} = useParams()
-    const store = useStore()
+    if (!receiptId){
+      throw new Error("Receipt not defined")
+    }
     const { onCopy, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
 
-   const state = useAtom(store)
+    const dispatch = useDispatch<AppDispatch>()
+    const viewModel = useSelector(createGrabMessageViewModel({
+      dispatch,
+      depositId : receiptId
+    }))
+
 
     const grab = async ()=>{
       if (!receiptId){
         throw new Error("Receipt id not found")
       }
-      return store.actions.grab(receiptId)
+      return viewModel.grab()
     }
 
     const copyMessage = useCallback(()=>{
-      if (!state.lastMessage) return
-      setValue(state.lastMessage.content)
+      if (viewModel.status !== "destroyed") return
+      setValue(viewModel.message)
       onCopy()
-    }, [state.lastMessage])
+    }, [viewModel.status, onCopy, setValue])
 
 
     useEffect(()=>{
@@ -33,21 +39,9 @@ export const GrabFormControl = ()=>{
       }
     }, [receiptId])
 
+   
     useEffect(()=>{
-      if (state.lastMessage){
-        
-        setValue(state.lastMessage.content)
-        setGrabStatus("destroyed")
-        return
-      }
-      if (state.errors.length > 0){
-        setGrabStatus("failure")
-        return
-      }
-    }, [state.errors, state.lastMessage])
-
-    useEffect(()=>{
-      switch(grabStatus){
+      switch(viewModel.status){
         case 'destroyed':{
           toast({
             title: 'Félicitations !',
@@ -69,21 +63,21 @@ export const GrabFormControl = ()=>{
           return
         }
       }
-    }, [grabStatus])
+    }, [viewModel.status])
 
     const toast = useToast()
     return <FormControl gap={16} flex={1}>
-              {grabStatus === "ready" && <FormLabel flex={1}>Lire et détruire le message {receiptId} ?</FormLabel>}
-              {(grabStatus === "destroyed" ) && <FormLabel flex={1}>Le message {receiptId} n'est désormais plus accessible.</FormLabel>}
-              { grabStatus === "ready" && 
+              {viewModel.status === "ready" && <FormLabel flex={1}>Lire et détruire le message {receiptId} ?</FormLabel>}
+              {(viewModel.status === "destroyed" ) && <FormLabel flex={1}>Le message {receiptId} n'est désormais plus accessible.</FormLabel>}
+              { viewModel.status === "ready" && 
                 <div style={{flex:1, gap:16, display: 'flex', justifyContent: 'space-between'}}>
                   <Button flex={1} colorScheme='teal' onClick={()=>grab()}>Oui je suis prêt !</Button>
                   <Button flex={1} colorScheme='gray'>Non pas encore</Button>
                 </div>
               }
-              { grabStatus === "destroyed" && store.value.lastMessage &&
+              { viewModel.status === "destroyed" &&  
                 <div style={{display: 'flex', flex:1, gap: 16, flexDirection: 'column'}}>
-                  <Textarea style={{border: 0}} value={store.value.lastMessage.content} disabled backgroundColor={"Highlight"}  />
+                  <Textarea style={{border: 0}} value={viewModel.message} disabled backgroundColor={"Highlight"}  />
                   <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyMessage()}>{hasCopied ? 'Copié !': 'Copier le message'}</Button>
                 </div>
               }

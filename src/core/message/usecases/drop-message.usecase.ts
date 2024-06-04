@@ -1,7 +1,5 @@
-import { Dependencies } from "../../create-core.store"
-import { makeErr } from "../../common/models/err.model"
 import { createAppAsyncThunk } from "../../create-core-thunk"
-
+import { createAction } from "@reduxjs/toolkit"
 export type Params = {
     content: string
 }
@@ -11,35 +9,23 @@ export type Result = {
     at: string
     message: string
 }
-export const createDropAnonymousMessage = (deps: Dependencies)=>{
-    return async (params: Params): Promise<Result>=>{
-        const now = deps.dateProvider.now()
-        try{
-            const willGenerateMessageId = deps.idGenerator.generate()
-            const response = await deps.messageGateway.dropAnonymous({content: params.content, at: now, messageId: willGenerateMessageId})
-            return  {receipt: response.receipt, at: now, validUntil: response.validUntil, message: willGenerateMessageId }
-        }
-        catch(e){
-            throw makeErr("DROP_MESSAGE_ERROR", "GATEWAY_ERROR", e as Error)
-        }
-    }
-}
-
+export type DropMessageFailure = {messageId:string, failWith: "GATEWAY_ERROR"}
 export const dropMessage = createAppAsyncThunk(
     "messages/drop",
     async (
-      {content}: { content: string },
+      content: string,
       { extra: { dateProvider, idGenerator, messageGateway }, rejectWithValue }
     ) => {
         const now = dateProvider.now()
+        const willGenerateMessageId = idGenerator.generate()
         try{
-            const willGenerateMessageId = idGenerator.generate()
             const response = await messageGateway.dropAnonymous({content: content, at: now, messageId: willGenerateMessageId})
-            return  {receipt: response.receipt, at: now, validUntil: response.validUntil, message: willGenerateMessageId }
+            return  {receipt: response.id, at: now, validUntil: response.validUntil, message: willGenerateMessageId }
         }
         catch(e){
-            return rejectWithValue(makeErr("DROP_MESSAGE_ERROR", "GATEWAY_ERROR", e as Error))
+            return rejectWithValue({messageId:willGenerateMessageId, failWith: "GATEWAY_ERROR"})
         }
     }
   );
   
+  export const enterContent = createAction<string>("messages/enter")
