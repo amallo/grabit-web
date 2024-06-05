@@ -1,15 +1,19 @@
-import { Dependencies } from "../../create-core.store"
-import { makeErr } from "../../common/models/err.model"
-import { Message } from "../models/message.model"
+import { createAppAsyncThunk } from "../../create-core-thunk"
 
-export const createGrabMessage = (deps: Dependencies)=>{
-    return async (receiptId: string): Promise<Message>=>{
+
+export type GrabMessageFailure = {depositId:string, failWith: "GATEWAY_ERROR"}
+export const grabMessage = createAppAsyncThunk(
+    "messages/grab",
+    async (
+      {receipt}: { receipt: string },
+      { extra: { messageGateway }, rejectWithValue }
+    ) => {
         try{
-            return await deps.messageGateway.grab(receiptId)
+            return await messageGateway.grab(receipt)
         }
         catch(e){
-            console.log("createGrabMessage", e)
-            throw makeErr("GRAB_MESSAGE_ERROR", "GATEWAY_ERROR", e as Error)
+            return rejectWithValue({depositId:receipt, failWith: "GATEWAY_ERROR"})
         }
     }
-}
+  );
+  

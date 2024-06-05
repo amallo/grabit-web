@@ -1,6 +1,5 @@
 import logo from './logo.svg';
 import './App.css';
-import { DropFormControl } from './components/messages/drop.form';
 
 type Props = {
   children?: JSX.Element

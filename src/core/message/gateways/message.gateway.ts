@@ -1,7 +1,8 @@
 import { Message } from "../models/message.model"
 
 export type DropMessageResponse =  {
-    receipt: string
+    id: string
+    at: string
     validUntil: string
 }
 export type DropAnonymousMessageRequest = {
@@ -10,6 +11,6 @@ export type DropAnonymousMessageRequest = {
     messageId: string
 }
 export interface MessageGateway{
-    dropAnonymous(message: DropAnonymousMessageRequest): Promise<DropMessageResponse>
+    dropAnonymous(request: DropAnonymousMessageRequest): Promise<DropMessageResponse>
     grab(receiptId: string): Promise<Message>
 }

@@ -13,7 +13,8 @@ export class InMemoryMessageGateway implements MessageGateway{
                 const generatedReceiptId = this.receiptIdGenerator.generate()
                 const generatedMessageId = this.receiptIdGenerator.generate()
                 const receipt : DropMessageResponse= {
-                    receipt: generatedReceiptId,
+                    id: generatedReceiptId,
+                    at: new Date().toISOString(),
                     validUntil: new Date(new Date(message.at).getTime() + this.validityPeriodInHours * 3600 * 1000).toISOString()
                 }
                 this.receipts[generatedMessageId] = receipt

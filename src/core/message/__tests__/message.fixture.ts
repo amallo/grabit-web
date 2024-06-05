@@ -1,14 +1,14 @@
-import { Dependencies } from "../../create-core.store"
-import { Err } from "../../common/models/err.model"
+import { AppStore, Dependencies, createStore } from "../../create-core.store"
 import { FailureMessageGateway } from "../gateways/failure.message.gateway"
 import { FakeDateProvider } from "../../common/gateways/fake-date.provider"
 import { FakeMessageGateway } from "../gateways/fake.message.gateway"
-import {  DropMessageResponse } from "../gateways/message.gateway"
-import { DropMessageReceipt } from "../models/drop-message-receipt.model"
+import { Deposit } from "../models/drop-message-receipt.model"
 import { FakeIdGenerator } from "../../common/gateways/fake-id.generator"
-import {  createMessageStore } from "../stores/message.store"
 import { Message } from "../models/message.model"
-export const createMessageFixture = ()=>{
+import { grabMessage } from "../usecases/grab-message.usecase"
+import { dropMessage } from "../usecases/drop-message.usecase"
+import { StateBuilder, dropState, grabState, rootState } from "../../state.builder"
+export const createMessageFixture = (stateBuilder: StateBuilder = rootState())=>{
     const messageGateway = new FakeMessageGateway()
     const dateProvider = new FakeDateProvider()
 
@@ -16,56 +16,84 @@ export const createMessageFixture = ()=>{
     const dependencies: Dependencies = {
         messageGateway, dateProvider, idGenerator
     }
-    const store = createMessageStore(dependencies)
+  
+    let store: AppStore
     
     return {
         givenNowIs(now: Date){
             dateProvider.nowIs(now)
         },
-        givenWillDropMessageResponse(response: DropMessageResponse){
-            messageGateway.willReturnDropResponse(response)
-        },
-        givenPreviousError(err: Err){
-            store.actions.appendError(err)
-        },
-        givenMessageId(messageId: string){
+        givenWillGenerateMessageId(messageId: string){
             idGenerator.willGenerate(messageId)
         },
-        givenGrabbedMessage(message: Message){
+        givenWillGrabMessage(message: Message){
             messageGateway.willGrabMessage(message)
         },
-        whenDroppingAnonymousMessage(params: {content: string}, error?: Error){
+        givenDepositForMessage({forMessage, deposit}:  {forMessage: string, deposit: Deposit}){
+            messageGateway.willReturnDepositForMessage(forMessage, deposit)
+        },
+        givenMessageForDeposit({depositId, content}: {depositId: string, content: string}){
+            messageGateway.willReturnMessageForDeposit(depositId, {content})
+        },
+        async whenDroppingTextMessage(params: {content: string}, error?: Error){
             if (error){
                 const failureMessageGateway = new FailureMessageGateway()
                 failureMessageGateway.willRejectWith(error)
                 dependencies.messageGateway = failureMessageGateway
             }
-            return store.actions.dropAnonymous(params)
+            store = createStore(dependencies, stateBuilder
+                    .build())
+            return store.dispatch(dropMessage(params.content))
         },
-        whenGrabbingMessage(receiptId: string,  error?: Error){
+        whenGrabbingMessage(depositId: string,  error?: Error){
             if (error){
                 const failureMessageGateway = new FailureMessageGateway()
                 failureMessageGateway.willRejectWith(error)
                 dependencies.messageGateway = failureMessageGateway
             }
-            return store.actions.grab(receiptId)
+            store = createStore(dependencies, stateBuilder.build())
+            return store.dispatch(grabMessage({receipt: depositId}))
         },
-        thenReceiptOfMessageShouldEqual(messageId: string, expected: DropMessageReceipt){
-            expect(store.value.receiptsByMessage[messageId]).toEqual(expected)
-        },
-        thenShouldFailWith(err: Err){
-            expect(store.value.errors).toContainEqual(err)
-        },
-        thenNoErrors(){
-            expect(store.value.errors).toEqual([])
-        },
-        thenDeliveredMessageShouldBe(message: Message){
-            expect(store.value.lastMessage).toEqual(message)
+        thenGrabbedMessageShouldBe(message: Message){
+            stateBuilder.withGrabState(grabState()
+                .withNotLoading()
+                .withLastMessage(message))
+            expect(store.getState()).toEqual(stateBuilder.build())
         },
         thenGrabHasBeenCalledWith(receiptId: string){
             expect(messageGateway.wasGrabbedWith()).toBe(receiptId)
+        },
+        thenDepositShouldBe({forMessage, expected}: {forMessage: string, expected: Deposit}){
+            stateBuilder.withDropState(dropState()
+                .withNotLoading()
+                .withDeposit({messageId: forMessage, withDeposit: expected}))
+            expect(store.getState()).toEqual(stateBuilder.build())
+        },
+        thenDropMessageShouldHaveBeenCalledWith(content: string){
+            expect(messageGateway.wasDroppedWith().content).toEqual(content)
+        },
+        thenShouldDropping(){
+            stateBuilder.withDropState(dropState()
+                .withLoading())
+            expect(store.getState()).toEqual(stateBuilder.build())
+        },
+        thenDropMessageShouldFailWith({messageId, failWith}: {messageId: string, failWith: string}){
+            stateBuilder.withDropState(dropState()
+                .withNotLoading()
+                .withFailure({messageId, failWith}))
+            expect(store.getState()).toEqual(stateBuilder.build())
+        },
+        thenGrabMessageShouldFailWith({depositId, failWith}: {depositId: string, failWith: string}){
+            stateBuilder.withGrabState(grabState()
+                .withNotLoading()
+                .withFailure({depositId, failWith}))
+                .build()
+            expect(store.getState()).toEqual(stateBuilder.build())
+        },
+        thenShouldGrabbing(){
+            stateBuilder.withGrabState(grabState()
+                .withLoading())
+            expect(store.getState()).toEqual(stateBuilder.build())
         }
     }
-    
-        
 }

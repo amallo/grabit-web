@@ -1,44 +1,53 @@
-import { FormControl, FormLabel, Textarea, Button, useToast } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { FormControl, FormLabel, Textarea, Button, useToast, useClipboard } from "@chakra-ui/react"
+import { useCallback, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { useStore } from "../store.context"
-type GrabStatus = "ready"| "destroyed"|'failure'
+import { CheckIcon, CopyIcon } from "@chakra-ui/icons"
+import { useDispatch, useSelector } from "react-redux"
+import { createGrabMessageViewModel } from "./grab-message.viewmodel"
+import { AppDispatch } from "../../core/create-core.store"
 export const GrabFormControl = ()=>{
-    const [grabStatus, setGrabStatus] = useState<GrabStatus>("ready")
     const {receiptId} = useParams()
-    const store = useStore()
+    if (!receiptId){
+      throw new Error("Receipt not defined")
+    }
+    const { onCopy, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
+
+    const dispatch = useDispatch<AppDispatch>()
+    const viewModel = useSelector(createGrabMessageViewModel({
+      dispatch,
+      depositId : receiptId
+    }))
+
+
     const grab = async ()=>{
       if (!receiptId){
         throw new Error("Receipt id not found")
       }
-      return store.actions.grab(receiptId)
+      return viewModel.grab()
     }
+
+    const copyMessage = useCallback(()=>{
+      if (viewModel.status !== "destroyed") return
+      setValue(viewModel.message)
+      onCopy()
+    }, [viewModel.status, onCopy, setValue])
+
+
     useEffect(()=>{
       if (!receiptId){
         throw new Error("Receipt id not found")
       }
     }, [receiptId])
 
+   
     useEffect(()=>{
-      console.log("store.value.errors", store.value.errors)
-      if (store.value.lastMessage){
-        setGrabStatus("destroyed")
-        return
-      }
-      if (store.value.errors.length > 0){
-        setGrabStatus("failure")
-        return
-      }
-    }, [store.value.errors])
-
-    useEffect(()=>{
-      switch(grabStatus){
+      switch(viewModel.status){
         case 'destroyed':{
           toast({
             title: 'Félicitations !',
             description: `Le message ${receiptId} a bien été lu. Vous pouvez maintenant le copier/coller pour le conserver.`,
             status: 'success',
-            duration: 9000,
+            duration: 6000,
             isClosable: true,
           })
           return
@@ -46,7 +55,7 @@ export const GrabFormControl = ()=>{
         case 'failure':{
           toast({
             title: 'Message introuvable',
-            description: `Hmm, il semble que le message n'existe plus.`,
+            description: `Hmm, il semble que ce message n'existe plus.`,
             status: 'error',
             duration: 9000,
             isClosable: true,
@@ -54,22 +63,23 @@ export const GrabFormControl = ()=>{
           return
         }
       }
-    }, [grabStatus])
+    }, [viewModel.status])
 
     const toast = useToast()
     return <FormControl gap={16} flex={1}>
-              {grabStatus === "ready" && <FormLabel flex={1}>Lire et détruire le message {receiptId} ?</FormLabel>}
-              {(grabStatus === "destroyed" || grabStatus === "failure" ) && <FormLabel flex={1}>Le message {receiptId} a bien été lu et n'est plus accessible.</FormLabel>}
-              { grabStatus === "ready" && 
+              {viewModel.status === "ready" && <FormLabel flex={1}>Lire et détruire le message {receiptId} ?</FormLabel>}
+              {(viewModel.status === "destroyed" ) && <FormLabel flex={1}>Le message {receiptId} n'est désormais plus accessible.</FormLabel>}
+              { viewModel.status === "ready" && 
                 <div style={{flex:1, gap:16, display: 'flex', justifyContent: 'space-between'}}>
                   <Button flex={1} colorScheme='teal' onClick={()=>grab()}>Oui je suis prêt !</Button>
                   <Button flex={1} colorScheme='gray'>Non pas encore</Button>
                 </div>
               }
-              { grabStatus === "destroyed" && store.value.lastMessage &&
-                <>
-                  <Textarea value={store.value.lastMessage.content} disabled backgroundColor={"Highlight"}  />
-                </>
+              { viewModel.status === "destroyed" &&  
+                <div style={{display: 'flex', flex:1, gap: 16, flexDirection: 'column'}}>
+                  <Textarea style={{border: 0}} value={viewModel.message} disabled backgroundColor={"Highlight"}  />
+                  <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyMessage()}>{hasCopied ? 'Copié !': 'Copier le message'}</Button>
+                </div>
               }
           </FormControl>
 }

@@ -1,22 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ChakraProvider } from "@chakra-ui/react"
-import { StoreContext, appStore } from './components/store.context';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
-
+import { rootState } from './core/state.builder';
+import { Provider } from 'react-redux';
+import { createAppStore } from './core/create-app.store';
+const store = createAppStore(rootState().build())
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
+
     <ChakraProvider>
-      <StoreContext.Provider value={appStore}>
+      <Provider store={store}>
         <RouterProvider router={router} />
-      </StoreContext.Provider>
+      </Provider>
     </ChakraProvider>
   </React.StrictMode>
 );
