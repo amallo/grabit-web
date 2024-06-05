@@ -50,9 +50,8 @@ export const DropFormControl = ()=>{
               <FormLabel>Déposer un message privé</FormLabel>
               {!viewModel.deposit && <>
                 <Textarea 
-                    placeholder={viewModel.hasError ? 'Prêt pour un nouvel essai ? Cliquez sur Recommencer' : 'Entrez ici votre message'}
+                    placeholder={ 'Entrez ici votre message'}
                     value={content} 
-                    readOnly={viewModel.hasError}
                     borderColor={viewModel.hasError ? 'tomato' : undefined} 
                     onChange={((e)=>setContent(e.currentTarget.value))} />
                 <FormHelperText>Votre message sera immédiatement détruit dès sa première lecture.</FormHelperText>
@@ -66,11 +65,11 @@ export const DropFormControl = ()=>{
               <FormHelperText color="GrayText" margin={0}>Vous pouvez envoyer ce lien dès maintenant à la personne de votre choix</FormHelperText>            
               }
               <div style={{display: 'flex', flex: 1, justifyContent: 'space-between', marginTop: 16 }}>
-              { viewModel.canSubmit &&
+              { viewModel.canSubmit && !viewModel.deposit &&
                 <Button colorScheme='teal' onClick={()=> viewModel.submit()}>Déposer le message</Button>
               }
                 
-                  <Button colorScheme='gray' onClick={()=>retry()}>Annuler</Button>
+                  <Button colorScheme='gray' onClick={()=>retry()}>Recommencer</Button>
                 
                 { viewModel.canCopyDepositToClipboard &&
                   <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyToClipboard()}>{hasCopied ? 'Copié !': 'Copier le lien'}</Button>

@@ -14,7 +14,12 @@ export const initialState : DropState = {wasDropped: {},  wasLoading: false, was
 export const dropSlice = createSlice({
     name: "drops",
     initialState,
-    reducers: {},
+    reducers: {
+        clearLastDeposit(state){
+            state.lastDeposit = undefined
+            state.wasNotDropped = {}
+        }
+    },
     extraReducers(builder) {
         builder
          .addCase(dropMessage.pending, (state) => {

@@ -1,6 +1,6 @@
 import { AppDispatch, RootState } from "../../core/create-core.store";
 import { dropMessage } from "../../core/message/usecases/drop-message.usecase";
-import { selectLastDeposit, selectHasDropMessageError } from "../../core/message/models/drop.reducer";
+import { selectLastDeposit, selectHasDropMessageError, dropSlice } from "../../core/message/models/drop.reducer";
 
 
 
@@ -13,6 +13,9 @@ export const createDropMessageViewModel = ({dispatch, content}:{dispatch: AppDis
         hasError: selectHasDropMessageError(state),
         submit(){
             return dispatch(dropMessage(content))
+        },
+        clear(){
+            return dispatch(dropSlice.actions.clearLastDeposit())
         }
     }
 }
