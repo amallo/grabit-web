@@ -12,7 +12,6 @@ const ErrorDescription = ()=>{
 export const DropFormControl = ()=>{
   const dispatch = useDispatch<AppDispatch>();
   
-  const { onCopy, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
   const [content, setContent] = useState("")
   const toast = useToast()
   const viewModel = useSelector(createDropMessageViewModel({
@@ -20,6 +19,7 @@ export const DropFormControl = ()=>{
     content
   }))
 
+  const { onCopy, setValue, hasCopied } = useClipboard(viewModel.deposit||'', {timeout: 2000 })
   const copyToClipboard = ()=>{
       if (!viewModel.deposit) return
       setValue(viewModel.deposit)
@@ -28,6 +28,7 @@ export const DropFormControl = ()=>{
 
   const retry = ()=>{
     setContent("")
+    viewModel.clear()
   }
 
   useEffect(()=>{

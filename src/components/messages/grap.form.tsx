@@ -10,14 +10,13 @@ export const GrabFormControl = ()=>{
     if (!receiptId){
       throw new Error("Receipt not defined")
     }
-    const { onCopy, setValue, hasCopied } = useClipboard('', {timeout: 2000 })
 
     const dispatch = useDispatch<AppDispatch>()
     const viewModel = useSelector(createGrabMessageViewModel({
       dispatch,
       depositId : receiptId
     }))
-
+    const { onCopy, setValue, hasCopied } = useClipboard(viewModel.status === 'destroyed' ? viewModel.message : '', {timeout: 2000 })
 
     const grab = async ()=>{
       if (!receiptId){
