@@ -19,4 +19,4 @@ jobs:
             npm ci 
             npm run build 
             cd /var/www/grabbit/
-            sudo caddy reload
+            sudo caddy reload --config /etc/caddy/Caddyfile
