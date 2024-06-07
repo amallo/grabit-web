@@ -76,7 +76,7 @@ export const GrabFormControl = ()=>{
               }
               { viewModel.status === "destroyed" &&  
                 <div style={{display: 'flex', flex:1, gap: 16, flexDirection: 'column'}}>
-                  <Textarea style={{border: 0}} value={viewModel.message} disabled backgroundColor={"Highlight"}  />
+                  <Textarea style={{border: 0}} value={viewModel.message}   textColor={"black"} disabled backgroundColor={"azure"}  />
                   <Button leftIcon={hasCopied ? <CheckIcon/>: <CopyIcon/>}  onClick={()=>copyMessage()}>{hasCopied ? 'Copié !': 'Copier le message'}</Button>
                 </div>
               }
