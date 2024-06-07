@@ -1,6 +1,6 @@
 import { FormControl, FormLabel, Textarea, Button, useToast, useClipboard } from "@chakra-ui/react"
 import { useCallback, useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { redirect, useNavigate, useParams } from "react-router-dom"
 import { CheckIcon, CopyIcon } from "@chakra-ui/icons"
 import { useDispatch, useSelector } from "react-redux"
 import { createGrabMessageViewModel } from "./grab-message.viewmodel"
@@ -10,6 +10,7 @@ export const GrabFormControl = ()=>{
     if (!receiptId){
       throw new Error("Receipt not defined")
     }
+    const navigate = useNavigate();
 
     const dispatch = useDispatch<AppDispatch>()
     const viewModel = useSelector(createGrabMessageViewModel({
@@ -71,7 +72,7 @@ export const GrabFormControl = ()=>{
               { viewModel.status === "ready" && 
                 <div style={{flex:1, gap:16, display: 'flex', justifyContent: 'space-between'}}>
                   <Button flex={1} colorScheme='teal' onClick={()=>grab()}>Oui je suis prêt !</Button>
-                  <Button flex={1} colorScheme='gray'>Non pas encore</Button>
+                  <Button flex={1} colorScheme='gray' onClick={()=>navigate("/")} >Non pas encore</Button>
                 </div>
               }
               { viewModel.status === "destroyed" &&  

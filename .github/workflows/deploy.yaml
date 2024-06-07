@@ -17,6 +17,7 @@ jobs:
             git checkout .
             git pull origin main 
             npm ci 
+            npm run test
             npm run build 
             cd /var/www/grabbit/
             sudo caddy reload --config /etc/caddy/Caddyfile
